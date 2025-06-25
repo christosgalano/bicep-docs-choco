@@ -1,0 +1,35 @@
+name: Update NuSpec Version
+
+on:
+  workflow_dispatch: 
+    inputs:
+      version:
+        description: 'Version to update to (vX.Y.Z)'
+        type: string
+        required: true
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update nuspec version
+        run: |
+          version="${{ github.event.inputs.version }}"
+          version="${version#v}"  # Remove 'v' prefix if present
+          sed -i "s|<version>.*</version>|<version>${version}</version>|" bicep-docs.nuspec
+          sed -i "s|<releaseNotes>.*</releaseNotes>|<releaseNotes>https://github.com/christosgalano/bicep-docs/releases/tag/v${version}</releaseNotes>|" bicep-docs.nuspec
+
+          echo "Updated nuspec version to $version"
+
+      - name: Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update nuspec version to ${{ github.event.inputs.version }}"
+          git push
