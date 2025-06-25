@@ -1,7 +1,7 @@
 name: Update NuSpec Version
 
 on:
-  workflow_dispatch: 
+  workflow_call:  
     inputs:
       version:
         description: 'Version to update to (vX.Y.Z)'
